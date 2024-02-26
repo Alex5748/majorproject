@@ -37,33 +37,61 @@ app.route('/esp-data')
     }
   });
 
-// Endpoint to retrieve data from MongoDB
+// Endpoint to receive waterflow data from ESP
+app.route('/esp-waterflow-data')
+  .get((req, res) => {
+    // Handling GET request for /esp-waterflow-data
+    res.send('GET request to /esp-waterflow-data');
+  })
+  .post(async (req, res) => {
+    // Handling POST request for /esp-waterflow-data
+    const waterflowDataFromESP = req.body;
+    console.log('Waterflow data received from ESP8266:', waterflowDataFromESP);
 
-app.get('/get-data', async (req, res) => {
     try {
       const db = getDb();
-      const collection = db.collection('test2');
-  
-      // Fetch all documents from the collection
-      const documents = await collection.find({}).toArray();
-  
-      res.json(documents);
+      const collection = db.collection('test123');
+
+      const result = await collection.insertOne(waterflowDataFromESP);
+      console.log('Waterflow data inserted into MongoDB:', result.ops);
+
+      res.send('Waterflow data received and stored in MongoDB successfully');
     } catch (error) {
-      console.error('Error retrieving data from MongoDB:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error('Error storing waterflow data in MongoDB:', error);
+      res.status(500).send('Internal Server Error');
     }
   });
-  
-  
 
-// Additional routes
-const tank_routes = require("./routes/tankr");
-app.get("/", (req, res) => {
-  res.send("Trying to connect WaterTank");
+// Endpoint to retrieve the last data from MongoDB for test2 collection
+app.get('/get-latest-test2-data', async (req, res) => {
+    try {
+        const db = getDb();
+        const collection = db.collection('test2');
+
+        // Fetch the last document from the collection
+        const latestDocument = await collection.find({}).sort({ _id: -1 }).limit(1).toArray();
+
+        res.json(latestDocument);
+    } catch (error) {
+        console.error('Error retrieving latest test2 data from MongoDB:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
-app.use("/api/tank", tank_routes);
-app.use("/hello", (req, res) => {
-  res.send("Hello");
+
+// Endpoint to retrieve the last data from MongoDB for test123 collection
+app.get('/get-latest-test123-data', async (req, res) => {
+    try {
+        const db = getDb();
+        const collection = db.collection('test123');
+
+        // Fetch the last document from the collection
+        const latestDocument = await collection.find({}).sort({ _id: -1 }).limit(1).toArray();
+
+        res.json(latestDocument);
+    } catch (error) {
+        console.error('Error retrieving latest test123 data from MongoDB:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 // Start the server
