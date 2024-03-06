@@ -14,7 +14,7 @@ int waterlevel2;
 
 const char* ssid = "Sagarmatha";
 const char* password = "sagarmatha";
-const char* serverUrl = "http://172.130.103.162:5000/esp-data"; // Update with your server's IP
+const char* serverUrl = "http://172.130.102.132:5000/esp-data"; // Update with your server's IP
 
 void setup() {
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output

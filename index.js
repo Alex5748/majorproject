@@ -6,8 +6,13 @@ const { connectToMongo, getDb } = require('./db/connect');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+
+//const bodyParser = require("body-parser");
+
 // Middleware to parse JSON data
 app.use(express.json());
+
+//app.use(bodyParser.json);
 
 // MongoDB connection
 connectToMongo();
@@ -32,6 +37,38 @@ app.post('/esp-data', async (req, res) => {
     }
 });
 
+//on off work on switch states
+let switchdata;
+
+const fetchData = async () => {
+    try {
+      const response = await fetch('http://172.130.102.18:3000/switch');
+      const data = await response.json();
+       // console.log('Switch state:', data.value);
+        switchdata = data.value;
+        //console.log(switchdata);
+      // Use the switch state here as needed
+    } catch (error) {
+      console.error('Error fetching switch state:', error);
+    }
+    
+};
+
+
+//fetchData();
+  
+setInterval(fetchData, 1000);
+
+
+//End of switch states
+
+
+
+
+
+
+
+
 // Endpoint to receive data from ESP for waterflow data
 app.post('/esp-data123', async (req, res) => {
     // Handling POST request for /esp-data123
@@ -45,7 +82,14 @@ app.post('/esp-data123', async (req, res) => {
         const result123 = await collection.insertOne(dataFromESP123);
         console.log('Data inserted into MongoDB testwater:', result123.ops);
 
-        res.send('Data received and stored in MongoDB successfully');
+        
+        //res.send('Data received and stored in MongoDB successfully');
+        if (switchdata === 1) {
+            res.send("1");
+        }
+        else {
+            res.send("5");
+        }
     } catch (error) {
         console.error('Error storing data in MongoDB:', error);
         res.status(500).send('Internal Server Error');
@@ -96,6 +140,7 @@ app.use("/hello", (req, res) => {
 
 // Additional routes for waterflow
 const tank_routes1 = require("./routes/tankwaterr");
+const bodyParser = require("body-parser");
 app.get("/waterflow", (req, res) => {
     res.send("Trying to connect Waterflow");
 });
